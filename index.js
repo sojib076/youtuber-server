@@ -34,6 +34,11 @@ const run = () => {
              console.log(result);
     
         })
+        app.post('/addService', async(req, res) => { 
+            const result = await service.insertOne(req.body);
+            res.send(result);
+            console.log(result);
+        })
     } catch (error) {
         console.log(error);
     }
