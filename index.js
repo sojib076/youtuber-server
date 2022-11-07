@@ -21,6 +21,14 @@ const run = () => {
     try {
         app.get('/service', async(req, res) => {
             const query = {};
+            const cursor = service.find(query).limit(3);
+            const result = await cursor.toArray();
+             res.send(result);
+             console.log(result);
+    
+        })
+        app.get('/services', async(req, res) => {
+            const query = {};
             const result = await service.find(query).toArray();
              res.send(result);
              console.log(result);
