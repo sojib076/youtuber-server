@@ -48,12 +48,12 @@ const run = async() => {
              res.send(result);
         })
         app.get('/reviews', async(req, res) => { 
-            const query = req.headers.serviceid
-            
-
-        
-            const result = await reviews.find({"serviceid":query}).toArray();
-                res.send(result);
+            let  query = {};
+            if (req.headers.serviceid) {
+                query = {serviceid:req.headers.serviceid}
+            }
+            const result = await reviews.find(query).toArray();
+             res.send(result);
         })
 
     } catch (error) {
