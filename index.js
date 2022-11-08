@@ -33,6 +33,13 @@ const run = async() => {
              res.send(result);
     
         })
+        app.post('/addservices', async(req, res) => { 
+          
+            const result = await service.insertOne(req.body);
+            res.send(result);
+          
+
+        })
         
         app.get('/services/:id', async(req, res) => {
             const id = req.params.id;
@@ -53,6 +60,20 @@ const run = async() => {
                 query = {serviceid:req.headers.serviceid}
             }
             const result = await reviews.find(query).toArray();
+             res.send(result);
+        })
+        // fillter reviews by gmail
+        app.get('/userreviews', async(req, res) => {
+                    const query =  req.query.email;
+                    const result = await reviews.find({'email':query}).toArray();
+                   res.send(result);
+                    
+        })
+        // delete reviews
+        app.delete('/reviews/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)}
+            const result = await reviews.deleteOne(query);
              res.send(result);
         })
 
