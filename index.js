@@ -7,16 +7,33 @@ const cors = require('cors');
 app.use(cors());
 // express json 
 app.use(express.json());
-
-/// mongodb connection
+const jwt = require('jsonwebtoken');
 
 
 const uri = `mongodb+srv://${process.env.Mongodb_name}:${process.env.Mongodb_Password}@cluster0.pucpolg.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+const verifytoken = (req,res,next) => 
+{
+ 
+    const authHeader = req.headers.authorization;
+    const token =  authHeader.split(' ')[1];
+    console.log(token);
+    if (token == null) return res.sendStatus(401);
+    jwt.verify(token,process.env.ACCESS_TOKEN,(err,user)=>{ 
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    })
+   
+
+}
 
 // mongodb api
 const run = async() => {
+
+
+
     const service = client.db("youtuber").collection("services");
     const reviews = client.db("youtuber").collection("reviews");
     try {
@@ -50,11 +67,11 @@ const run = async() => {
         app.post('/reviews', async(req, res) => {
             const query = req.body;
             // fetch data from serviceid);
-            console.log(req.headers.serviceid);
+        
             const result = await reviews.insertOne(query);
              res.send(result);
         })
-        app.get('/reviews', async(req, res) => { 
+        app.get('/reviews',verifytoken,async(req, res) => { 
             let  query = {};
             if (req.headers.serviceid) {
                 query = {serviceid:req.headers.serviceid}
@@ -63,7 +80,7 @@ const run = async() => {
              res.send(result);
         })
         // fillter reviews by gmail
-        app.get('/userreviews', async(req, res) => {
+        app.get('/userreviews',verifytoken,async(req, res) => {
                     const query =  req.query.email;
                     const result = await reviews.find({'email':query}).toArray();
                    res.send(result);
@@ -79,12 +96,25 @@ const run = async() => {
         // update reviews
         app.patch('/reviews/:id', async(req, res) => { 
             const id = req.params.id;
+            console.log(id);
             const query = {_id:ObjectId(id)}
             const info = req.body;
-
             const result = await reviews.updateOne(query,{$set:info});
                 res.send(result);
         })
+
+        app.get('/reviews/:id', async(req, res) => {
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)}
+            const result = await reviews.findOne(query);
+            res.send(result);
+        })
+        app.post('/jwt',(req,res)=>{
+             const user = req.body;
+                // const token = jwt.sign(user,process.env.ACCESS_TOKEN);
+                const token = jwt.sign(user,process.env.ACCESS_TOKEN);
+                res.send({token});
+        } )
 
     } catch (error) {
         console.log(error);
