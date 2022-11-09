@@ -76,6 +76,15 @@ const run = async() => {
             const result = await reviews.deleteOne(query);
              res.send(result);
         })
+        // update reviews
+        app.patch('/reviews/:id', async(req, res) => { 
+            const id = req.params.id;
+            const query = {_id:ObjectId(id)}
+            const info = req.body;
+
+            const result = await reviews.updateOne(query,{$set:info});
+                res.send(result);
+        })
 
     } catch (error) {
         console.log(error);
