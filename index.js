@@ -102,13 +102,14 @@ const run = async() => {
             const result = await reviews.updateOne(query,{$set:info});
                 res.send(result);
         })
-
+            // reviews by id
         app.get('/reviews/:id', async(req, res) => {
             const id = req.params.id;
             const query = {_id:ObjectId(id)}
             const result = await reviews.findOne(query);
             res.send(result);
         })
+        // handel jwt token
         app.post('/jwt',(req,res)=>{
              const user = req.body;
                 // const token = jwt.sign(user,process.env.ACCESS_TOKEN);
