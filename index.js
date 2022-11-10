@@ -37,7 +37,7 @@ const run = async() => {
     try {
         app.get('/service', async(req, res) => {
             const query = {};
-            const cursor = service.find(query).limit(3);
+            const cursor = service.find(query).sort({myDate:-1}).limit(3);
             const result = await cursor.toArray();
            
              res.send(result);
