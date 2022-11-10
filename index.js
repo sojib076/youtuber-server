@@ -75,7 +75,7 @@ const run = async() => {
             if (req.headers.serviceid) {
                 query = {serviceid:req.headers.serviceid}
             }
-            const result = await reviews.find(query).toArray();
+            const result = await reviews.find(query).sort({myDate:-1}).toArray();
              res.send(result);
         })
 
