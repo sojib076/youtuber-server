@@ -15,19 +15,17 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 const verifytoken = (req,res,next) => 
 {
- 
     const authHeader = req.headers.authorization;
+    if (!authHeader) return res.sendStatus(401);
     const token =  authHeader.split(' ')[1];
     console.log(token);
-    if (token == null) return res.sendStatus(401);
-    jwt.verify(token,process.env.ACCESS_TOKEN,(err,user)=>{ 
-        if (err) return res.sendStatus(403);
-        req.user = user;
+    jwt.verify(token,process.env.ACCESS_TOKEN,(err,decoded)=>{
+        if(err) {
+            return res.sendStatus(403);
+        }
+        req.decoded = decoded;
         next();
-    })
-   
-
-}
+    })}
 
 // mongodb api
 const run = async() => {
@@ -71,7 +69,7 @@ const run = async() => {
             const result = await reviews.insertOne(query);
              res.send(result);
         })
-        app.get('/reviews',verifytoken,async(req, res) => { 
+        app.get('/reviews',async(req, res) => { 
             let  query = {};
             if (req.headers.serviceid) {
                 query = {serviceid:req.headers.serviceid}
@@ -79,9 +77,13 @@ const run = async() => {
             const result = await reviews.find(query).toArray();
              res.send(result);
         })
-        // fillter reviews by gmail
+
         app.get('/userreviews',verifytoken,async(req, res) => {
-                    const query =  req.query.email;
+                        const decoded = req.decoded.loginuser;
+                    if (decoded !==req.query.email) { 
+                        return res.sendStatus(403);
+                    }
+                    const query =  req.query.email;     
                     const result = await reviews.find({'email':query}).toArray();
                    res.send(result);
                     
