@@ -39,6 +39,7 @@ const run = async() => {
             const query = {};
             const cursor = service.find(query).limit(3);
             const result = await cursor.toArray();
+           
              res.send(result);
              
         })
